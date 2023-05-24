@@ -1,0 +1,37 @@
+name: Python test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 5
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.10'
+  
+    - name: Install dependency
+      run: |
+          pip install --upgrade pip
+          pip install pytest
+          pip install pytest-cov
+          pip install poetry
+          poetry update
+          poetry install
+
+    - name: Run tests
+      run: |
+          set -e
+          export PYTHONPATH=$(pwd)
+          pytest --junitxml=junit/test-results.xml --cov-report term --cov=blackjack tests/
