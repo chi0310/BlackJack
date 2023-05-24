@@ -3,10 +3,10 @@ name: Python test
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
 
 jobs:
   build-linux:
@@ -24,8 +24,6 @@ jobs:
     - name: Install dependency
       run: |
           pip install --upgrade pip
-          pip install pytest
-          pip install pytest-cov
           pip install poetry
           poetry update
           poetry install
@@ -33,5 +31,4 @@ jobs:
     - name: Run tests
       run: |
           set -e
-          export PYTHONPATH=$(pwd)
-          pytest --junitxml=junit/test-results.xml --cov-report term --cov=blackjack tests/
+          poetry run pytest --junitxml=junit/test-results.xml --cov-report term --cov=blackjack tests/
