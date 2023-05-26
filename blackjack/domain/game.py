@@ -1,10 +1,11 @@
 from typing import Mapping
 
-from . import const
-from . import schema
+from . import const, schema
 from .player import Player
 
+
 class Game():
+
     def __init__(self, head_id: str) -> None:
         self.head_id = head_id
 
@@ -51,11 +52,9 @@ class Game():
         for p in self._players.values():
             if p._state != const.PLAYER.PASS:
                 ret = False
-        if ret: self._state = const.GAME.END
+        if ret:
+            self._state = const.GAME.END
         return ret
 
     def status(self) -> schema.GameStatus:
-        return schema.GameStatus(
-            game_id=self.game_id,
-            state=self._state.value
-        )
+        return schema.GameStatus(game_id=self.game_id, state=self._state.value)

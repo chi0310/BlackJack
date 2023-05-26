@@ -1,14 +1,18 @@
 import uuid
 
+
 class GameRepository():
+
     @classmethod
-    def make(cls, type: str, *args , **kwargs):
+    def make(cls, type: str, *args, **kwargs):
         if type == 'mem':
             return GameRepositoryMem(*args, **kwargs)
         else:
             raise NotImplementedError(f'{type} is not supported')
 
+
 class GameRepositoryMem(GameRepository):
+
     def __init__(self) -> None:
         self.id2ins = {}
 
@@ -21,5 +25,5 @@ class GameRepositoryMem(GameRepository):
     def get(self, game_id: str):
         game = self.id2ins.get(game_id)
         if game is None:
-            print(f'game_id of the game isn\'t exist')
+            print('game_id of the game isn\'t exist')
         return game
