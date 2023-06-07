@@ -3,15 +3,13 @@ import time
 import unittest
 from datetime import timedelta
 
-from blackjack.controller.middleware.jwt import JWT
-
-os.environ['JWT_SECRET_KEY'] = 'test'
-
 
 class TestMiddlewareJwt(unittest.TestCase):
 
     def setUp(self) -> None:
-
+        # set env and import
+        os.environ['JWT_SECRET_KEY'] = 'test'
+        from blackjack.controller.middleware.jwt import JWT
         self.jwt = JWT()
 
     def test_jwt(self):
