@@ -1,4 +1,3 @@
-import os
 from datetime import datetime, timedelta, timezone
 from typing import Union
 
@@ -6,17 +5,15 @@ from fastapi import HTTPException, Request
 from fastapi.security import HTTPBearer
 from jose import jwt
 
-SECRET_KEY = os.getenv('JWT_SECRET_KEY', None)
-if SECRET_KEY is None:
-    raise RuntimeError('No JWT_SECRET_KEY')
-else:
-    print(SECRET_KEY)
-ALGORITHM = 'HS256'
+from blackjack.utils import ENV
 
 
 # ref:
 # https://github.com/testdrivenio/fastapi-jwt/blob/main/app/auth/auth_bearer.py
 class JWT(HTTPBearer):
+
+    SECRET_KEY = ENV.SECRET_KEY
+    ALGORITHM = ENV.JWT_ALGORITHM
 
     def __init__(self, auto_error: bool = True):
         super().__init__(auto_error=auto_error)
@@ -39,7 +36,7 @@ class JWT(HTTPBearer):
     def verify_jwt(self, token: str):
         try:
             payload = jwt.decode(token,
-                                 SECRET_KEY, [ALGORITHM],
+                                 ENV.SECRET_KEY, [ENV.JWT_ALGORITHM],
                                  options={'verify_signature': False})
             exp = payload.get('exp', None)
             if (exp is None or exp <
@@ -47,7 +44,7 @@ class JWT(HTTPBearer):
                 payload = None
         except Exception:
             payload = None
-        else:
+        finally:
             return payload
 
     # ref: https://fastapi.tiangolo.com/zh/tutorial/security/oauth2-jwt/?h=jwt
@@ -65,5 +62,7 @@ class JWT(HTTPBearer):
         import time
         print(time.time())
         to_encode.update({'exp': expire})
-        encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+        encoded_jwt = jwt.encode(to_encode,
+                                 ENV.SECRET_KEY,
+                                 algorithm=ENV.JWT_ALGORITHM)
         return encoded_jwt

@@ -3,6 +3,12 @@ import uuid
 
 class GameRepository():
 
+    def save(self, *args):
+        raise NotImplementedError
+
+    def get(self, *args):
+        raise NotImplementedError
+
     @classmethod
     def make(cls, type: str, *args, **kwargs):
         if type == 'mem':
