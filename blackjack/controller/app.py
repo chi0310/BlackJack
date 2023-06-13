@@ -1,36 +1,47 @@
 from fastapi import FastAPI
 
-from blackjack.domain import schema
-from blackjack.usecase import game_usecase
+from blackjack.usecase import game_usecase as gu
+
+from .presenter import *  # NOQA
 
 app = FastAPI()
 
 
-@app.post('/game/create/by_player/{player_id}')
-async def create_game(player_id: str) -> str:
-    game_id = game_usecase.create_game(player_id)
-    return game_id
+@app.post('/game/create/by_player/{player_id}',
+          response_model=CreateGamePresenter.Response)
+async def create_game(player_id: str):
+    presenter = gu.CreateGame().execute(gu.CreateGame.Input(player_id),
+                                        CreateGamePresenter())
+    return presenter.as_view_model()
 
 
-@app.post('/game/{game_id}/join/{player_id}')
-async def join_game(game_id: str, player_id: str) -> bool:
-    success = game_usecase.join_game(game_id, player_id)
-    return success
+@app.post('/game/{game_id}/join/{player_id}',
+          response_model=JoinGamePresenter.Response)
+async def join_game(game_id: str, player_id: str):
+    presenter = gu.JoinGame().execute(gu.JoinGame.Input(game_id, player_id),
+                                      JoinGamePresenter())
+    return presenter.as_view_model()
 
 
-@app.post('/game/{game_id}/start/by_player/{player_id}')
-async def start_game(game_id: str, player_id: str) -> bool:
-    success = game_usecase.start(game_id, player_id)
-    return success
+@app.post('/game/{game_id}/start/by_player/{player_id}',
+          response_model=StartGamePresenter.Response)
+async def start_game(game_id: str, player_id: str):
+    presenter = gu.StartGame().execute(gu.StartGame.Input(game_id, player_id),
+                                       StartGamePresenter())
+    return presenter.as_view_model()
 
 
-@app.post('/game/{game_id}/{player_id}/play/pass')
+@app.post('/game/{game_id}/{player_id}/play/pass',
+          response_model=PlayGamePresenter.Response)
 async def play_pass(game_id, player_id):
-    success = game_usecase.playpass(game_id, player_id)
-    return success
+    presenter = gu.PlayPass().execute(gu.PlayPass.Input(game_id, player_id),
+                                      PlayGamePresenter())
+    return presenter.as_view_model()
 
 
-@app.post('/game/{game_id}/status', response_model=schema.GameStatus)
-async def game_status(game_id):
-    response = game_usecase.status(game_id)
-    return response
+@app.get('/game/{game_id}/{player_id}/status',
+         response_model=GameStatusPresenter.Response)
+async def game_status(game_id: str, player_id: str):
+    presenter = gu.GameStatus().execute(
+        gu.GameStatus.Input(game_id, player_id), GameStatusPresenter())
+    return presenter.as_view_model()
