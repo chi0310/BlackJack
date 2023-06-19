@@ -2,7 +2,7 @@ from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 
-from blackjack.domain import schema
+from blackjack.domain import event
 from blackjack.usecase import game_usecase
 
 from .middleware.jwt import JWT
@@ -35,7 +35,7 @@ async def play_pass(game_id, player_id):
     return success
 
 
-@app.post('/game/{game_id}/status', response_model=schema.GameStatus)
+@app.post('/game/{game_id}/status', response_model=event.GameStatus)
 async def game_status(game_id):
     response = game_usecase.status(game_id)
     return response

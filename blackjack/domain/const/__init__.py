@@ -9,6 +9,8 @@ class PLAYER(Enum):
 
 
 class GAME(Enum):
-    INIT = 0
+    CREATE = 0
     START = 1
-    END = 2
+    JOIN = 2
+    PLAYING = 3
+    END = 4
