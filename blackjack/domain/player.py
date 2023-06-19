@@ -7,12 +7,12 @@ class Player():
         self.game_id = game_id
 
         self._money = 0
-        self._state = const.PLAYER.INIT
+        self._status = const.PLAYER.INIT
 
     def play(self, action: str):
         if action == 'pass':
-            self._state = const.PLAYER.PASS
+            self._status = const.PLAYER.PASS
 
     @property
     def state(self):
-        return self._state
+        return self._status

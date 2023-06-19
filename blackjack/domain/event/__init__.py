@@ -1,18 +1,18 @@
 from dataclasses import dataclass
 
 
+@dataclass
 class DomainEvent():
-    pass
+    err: str = None
 
 
 @dataclass
 class ActionEvent(DomainEvent):
-    action: str
-    success: bool
-    player_id: str
-    game_id: str
+    action: str = ''
+    player_id: str = ''
+    game_id: str = ''
 
 
 @dataclass
 class StatusEvent(DomainEvent):
-    status: str
+    status: str = ''

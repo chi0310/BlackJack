@@ -23,7 +23,7 @@ class JoinGamePresenter(Presenter):
         success: bool
 
     def as_view_model(self):
-        return self.Response(success=self.events[0].success)
+        return
 
 
 class StartGamePresenter(Presenter):
@@ -32,7 +32,7 @@ class StartGamePresenter(Presenter):
         success: bool
 
     def as_view_model(self):
-        return self.Response(success=self.events[0].success)
+        return
 
 
 class PlayGamePresenter(Presenter):
@@ -41,7 +41,7 @@ class PlayGamePresenter(Presenter):
         success: bool
 
     def as_view_model(self):
-        return self.Response(success=self.events[0].success)
+        return
 
 
 class GameStatusPresenter(Presenter):
