@@ -14,3 +14,10 @@ class GAME(Enum):
     JOIN = 2
     PLAYING = 3
     END = 4
+
+
+class SUITS(Enum):
+    SPADES = 0
+    HEARTS = 1
+    DIAMONDS = 2
+    CLUBS = 3
