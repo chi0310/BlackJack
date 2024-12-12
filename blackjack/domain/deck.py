@@ -1,6 +1,14 @@
 import random
+from typing import List
+from dataclasses import dataclass
+
+import  blackjack.domain.exception as excp
 from . import const
-from .card import Card
+
+@dataclass
+class Card:
+    suit: int
+    num: int
 
 
 class Deck():
@@ -8,16 +16,19 @@ class Deck():
         self._cards = []
         for suit in const.SUITS:
             for num in range(1, 14, 1):
-                self._cards.append([suit, num])
+                card = Card(suit=suit, num=num)
+                self._cards.append(card)
 
-        self._sequence = None
-
-    def pick(self):
-        card_arg = self._cards[self._sequence.pop() % 52] 
-        suit = card_arg[0]
-        num = card_arg[1]
-        return Card(suit, num)
-
-    def shuffle(self):
-        # TODO this method is slow [ref](https://stackoverflow.com/a/9755548)
-        self._sequence = random.sample(range(52*4), 52*4) 
+        self._nums = len(self._cards)
+    
+    def pick(self) -> Card:
+        if not self.is_valid():
+            raise excp.DeckOutOfRangeError
+        self._nums -= 1
+        index = random.randint(0, self._nums)
+        ret = self._cards[index]
+        self._cards[index] = self._cards[self._nums]
+        return ret
+    
+    def is_valid(self) -> bool:
+        return self._nums > 0

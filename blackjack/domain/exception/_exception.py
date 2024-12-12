@@ -1,0 +1,4 @@
+
+
+class DeckOutOfRangeError(Exception):
+    pass
