@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>My Project - ReDoc</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="https://fastapi.tiangolo.com/img/favicon.png">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <style data-styled="" data-styled-version="4.4.1"></style>
+</head>
+<body>
+    <div id="redoc-container"></div>
+    <script src="https://cdn.jsdelivr.net/npm/redoc/bundles/redoc.standalone.js"> </script>
+    <script>
+        var spec = {"openapi": "3.0.2", "info": {"title": "FastAPI", "version": "0.1.0"}, "paths": {"/game/create/by_player/{player_id}": {"post": {"summary": "Create Game", "operationId": "create_game_game_create_by_player__player_id__post", "parameters": [{"required": true, "schema": {"title": "Player Id", "type": "string"}, "name": "player_id", "in": "path"}], "responses": {"201": {"description": "Successful Response", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/blackjack__controller__presenter__CreateGamePresenter__Response"}}}}, "422": {"description": "Validation Error", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/HTTPValidationError"}}}}}}}, "/game/{game_id}/join/{player_id}": {"post": {"summary": "Join Game", "operationId": "join_game_game__game_id__join__player_id__post", "parameters": [{"required": true, "schema": {"title": "Game Id", "type": "string"}, "name": "game_id", "in": "path"}, {"required": true, "schema": {"title": "Player Id", "type": "string"}, "name": "player_id", "in": "path"}], "responses": {"204": {"description": "Successful Response"}, "422": {"description": "Validation Error", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/HTTPValidationError"}}}}}}}, "/game/{game_id}/start/by_player/{player_id}": {"post": {"summary": "Start Game", "operationId": "start_game_game__game_id__start_by_player__player_id__post", "parameters": [{"required": true, "schema": {"title": "Game Id", "type": "string"}, "name": "game_id", "in": "path"}, {"required": true, "schema": {"title": "Player Id", "type": "string"}, "name": "player_id", "in": "path"}], "responses": {"204": {"description": "Successful Response"}, "422": {"description": "Validation Error", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/HTTPValidationError"}}}}}}}, "/game/{game_id}/{player_id}/play/pass": {"post": {"summary": "Play Pass", "operationId": "play_pass_game__game_id___player_id__play_pass_post", "parameters": [{"required": true, "schema": {"title": "Game Id"}, "name": "game_id", "in": "path"}, {"required": true, "schema": {"title": "Player Id"}, "name": "player_id", "in": "path"}], "responses": {"204": {"description": "Successful Response"}, "422": {"description": "Validation Error", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/HTTPValidationError"}}}}}}}, "/game/{game_id}/{player_id}/status": {"get": {"summary": "Game Status", "operationId": "game_status_game__game_id___player_id__status_get", "parameters": [{"required": true, "schema": {"title": "Game Id", "type": "string"}, "name": "game_id", "in": "path"}, {"required": true, "schema": {"title": "Player Id", "type": "string"}, "name": "player_id", "in": "path"}], "responses": {"200": {"description": "Successful Response", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/blackjack__controller__presenter__GameStatusPresenter__Response"}}}}, "422": {"description": "Validation Error", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/HTTPValidationError"}}}}}}}}, "components": {"schemas": {"HTTPValidationError": {"title": "HTTPValidationError", "type": "object", "properties": {"detail": {"title": "Detail", "type": "array", "items": {"$ref": "#/components/schemas/ValidationError"}}}}, "ValidationError": {"title": "ValidationError", "required": ["loc", "msg", "type"], "type": "object", "properties": {"loc": {"title": "Location", "type": "array", "items": {"anyOf": [{"type": "string"}, {"type": "integer"}]}}, "msg": {"title": "Message", "type": "string"}, "type": {"title": "Error Type", "type": "string"}}}, "blackjack__controller__presenter__CreateGamePresenter__Response": {"title": "Response", "required": ["game_id"], "type": "object", "properties": {"game_id": {"title": "Game Id", "type": "string"}}}, "blackjack__controller__presenter__GameStatusPresenter__Response": {"title": "Response", "required": ["status"], "type": "object", "properties": {"status": {"title": "Status", "type": "string"}}}}}};
+        Redoc.init(spec, {}, document.getElementById("redoc-container"));
+    </script>
+</body>
+</html>
