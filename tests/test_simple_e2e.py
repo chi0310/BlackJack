@@ -34,7 +34,7 @@ class TestSimpleE2E(unittest.TestCase):
 
         for p in players:
             reponse = self.test_client.post(
-                f'/api/v1/game/{game_id}/{p}/play/pass')
+                f'/api/v1/game/{game_id}/{p}/play/stand')
             self.assertEqual(reponse.status_code, status.HTTP_204_NO_CONTENT)
 
         reponse = self.test_client.get(

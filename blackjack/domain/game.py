@@ -2,6 +2,7 @@ from typing import Mapping
 
 from . import const, event
 from .player import Player
+from .dealer import Dealer
 
 
 class Game():
@@ -11,7 +12,7 @@ class Game():
 
         self.game_id = None
         self._players: Mapping[str, 'Player'] = {}
-        self._dealer = None
+        self._dealer = Dealer()
         self._deck = None
 
         self._status = const.GAME.CREATE
@@ -28,7 +29,7 @@ class Game():
                                     game_id=self.game_id,
                                     err=err)
             return [res]
-        player = Player(player_id)
+        player = Player(player_id, self._dealer, 0)
         self._players[player_id] = player
         if len(self._players) == 1:
             res = event.ActionEvent(action=const.GAME.CREATE,
@@ -54,14 +55,14 @@ class Game():
                                 err=err)
         return [res]
 
-    def play_pass(self, player_id):
+    def play_stand(self, player_id):
         err = None
         if self._status != const.GAME.START:
             err = 'game is not ready'
         player = self._players.get(player_id)
         if player is None:
             err = f'no valid player_id {player_id}'
-        player.play('pass')
+        player.stand()
         self.update_status()
         res = event.ActionEvent(action=const.GAME.PLAYING,
                                 player_id=player_id,
@@ -72,7 +73,7 @@ class Game():
     def update_status(self):
         ret = True
         for p in self._players.values():
-            if p._status != const.PLAYER.PASS:
+            if p.state != const.PLAYER.FINISHED:
                 ret = False
         if ret:
             self._status = const.GAME.END

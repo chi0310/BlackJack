@@ -60,7 +60,7 @@ class StartGame():
         return presenter
 
 
-class PlayPass():
+class PlayStand():
 
     class Input():
 
@@ -73,7 +73,7 @@ class PlayPass():
         if game is None:
             events = [DomainEvent(err=repo_err)]
         else:
-            events = game.play_pass(req.player_id)
+            events = game.play_stand(req.player_id)
         presenter.present(events)
         return presenter
 
