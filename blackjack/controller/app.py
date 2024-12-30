@@ -43,10 +43,10 @@ async def start_game(game_id: str, player_id: str):
     return presenter.as_view_model()
 
 
-@v1.post('/game/{game_id}/{player_id}/play/pass',
+@v1.post('/game/{game_id}/{player_id}/play/stand',
          status_code=status.HTTP_204_NO_CONTENT)
-async def play_pass(game_id, player_id):
-    presenter = gu.PlayPass().execute(gu.PlayPass.Input(game_id, player_id),
+async def play_stand(game_id, player_id):
+    presenter = gu.PlayStand().execute(gu.PlayStand.Input(game_id, player_id),
                                       PlayGamePresenter())
     ret = presenter.is_validate
     if ret is not None:
