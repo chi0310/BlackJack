@@ -16,7 +16,7 @@ class CreateGame():
             self.player_id = player_id
 
     def execute(self, req: Input, presenter: Presenter) -> Presenter:
-        game = Game(req.player_id)
+        game = Game()
         game_id = game_repo.save(game)
         game.game_id = game_id
         events = game.join(req.player_id)
