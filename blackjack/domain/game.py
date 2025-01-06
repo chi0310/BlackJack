@@ -1,15 +1,14 @@
-from typing import Mapping
+from typing import Mapping, Optional, Tuple
 
 from . import const, event
 from .player import Player
 from .dealer import Dealer
+from .errors import GameError
 
 
 class Game():
 
-    def __init__(self, head_id: str) -> None:
-        self.head_id = head_id
-
+    def __init__(self) -> None:
         self.game_id = None
         self._players: Mapping[str, 'Player'] = {}
         self._dealer = Dealer()
@@ -18,12 +17,12 @@ class Game():
         self._status = const.GAME.CREATE
 
     @classmethod
-    def create(cls):
+    def create(cls) -> 'Game':
         return cls()
 
     def join(self, player_id: str):
         if len(self._players) >= 4:
-            err = 'game is up to four players'
+            err = GameError.GAME_FULL
             res = event.ActionEvent(action=const.GAME.JOIN,
                                     player_id=player_id,
                                     game_id=self.game_id,
@@ -32,6 +31,7 @@ class Game():
         player = Player(player_id, self._dealer, 0)
         self._players[player_id] = player
         if len(self._players) == 1:
+            self.head_id = player_id
             res = event.ActionEvent(action=const.GAME.CREATE,
                                     player_id=player_id,
                                     game_id=self.game_id)
@@ -43,26 +43,72 @@ class Game():
 
     def start(self, player_id):
         if self.head_id != player_id:
-            err = 'not the head of the game'
+            err = GameError.NOT_HEAD_OF_GAME
+            res = event.ActionEvent(action=const.GAME.START,
+                                    player_id=player_id,
+                                    game_id=self.game_id,
+                                    err=err)
+            return [res]
         if len(self._players) == 4:
             self._status = const.GAME.START
             err = None
         else:
-            err = 'not enough player'
+            err = GameError.NOT_ENOUGH_PLAYERS
         res = event.ActionEvent(action=const.GAME.START,
                                 player_id=player_id,
                                 game_id=self.game_id,
                                 err=err)
         return [res]
 
-    def play_stand(self, player_id):
-        err = None
+    def _validate_player_action(self, player_id: str) -> Tuple[Optional[Player], Optional[int]]:
         if self._status != const.GAME.START:
-            err = 'game is not ready'
+            return None, GameError.GAME_NOT_STARTED
         player = self._players.get(player_id)
         if player is None:
-            err = f'no valid player_id {player_id}'
-        player.stand()
+            return None, GameError.INVALID_PLAYER_ID
+        return player, None
+
+    def play_hit(self, player_id):
+        player, err = self._validate_player_action(player_id)
+        if err is not None:
+            res = event.ActionEvent(action=const.GAME.PLAYING,
+                                    player_id=player_id,
+                                    game_id=self.game_id,
+                                    err=err)
+            return [res]
+        err = player.hit()
+        self.update_status()
+        res = event.ActionEvent(action=const.GAME.PLAYING,
+                                player_id=player_id,
+                                game_id=self.game_id,
+                                err=err)
+        return [res]
+
+    def play_stand(self, player_id):
+        player, err = self._validate_player_action(player_id)
+        if err is not None:
+            res = event.ActionEvent(action=const.GAME.PLAYING,
+                                player_id=player_id,
+                                game_id=self.game_id,
+                                err=err)
+            return [res]
+        err = player.stand()
+        self.update_status()
+        res = event.ActionEvent(action=const.GAME.PLAYING,
+                                player_id=player_id,
+                                game_id=self.game_id,
+                                err=err)
+        return [res]
+
+    def play_double(self, player_id):
+        player, err = self._validate_player_action(player_id)
+        if err is not None:
+            res = event.ActionEvent(action=const.GAME.PLAYING,
+                                player_id=player_id,
+                                game_id=self.game_id,
+                                err=err)
+            return [res]
+        err = player.double()
         self.update_status()
         res = event.ActionEvent(action=const.GAME.PLAYING,
                                 player_id=player_id,
