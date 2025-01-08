@@ -60,6 +60,24 @@ class StartGame():
         return presenter
 
 
+class PlayHit():
+
+    class Input():
+
+        def __init__(self, game_id: str, player_id: str):
+            self.game_id = game_id
+            self.player_id = player_id
+
+    def execute(self, req: Input, presenter: Presenter) -> Presenter:
+        game = game_repo.get(req.game_id)
+        if game is None:
+            events = [DomainEvent(err=repo_err)]
+        else:
+            events = game.play_hit(req.player_id)
+        presenter.present(events)
+        return presenter
+
+
 class PlayStand():
 
     class Input():
@@ -74,6 +92,24 @@ class PlayStand():
             events = [DomainEvent(err=repo_err)]
         else:
             events = game.play_stand(req.player_id)
+        presenter.present(events)
+        return presenter
+
+
+class PlayDouble():
+    
+    class Input():
+
+        def __init__(self, game_id: str, player_id: str):
+            self.game_id = game_id
+            self.player_id = player_id
+
+    def execute(self, req: Input, presenter: Presenter) -> Presenter:
+        game = game_repo.get(req.game_id)
+        if game is None:
+            events = [DomainEvent(err=repo_err)]
+        else:
+            events = game.play_double(req.player_id)
         presenter.present(events)
         return presenter
 
