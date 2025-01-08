@@ -1,8 +1,10 @@
-from blackjack.domain.deck import Deck, Card
+from .utils import calculate_score
+from .deck import Deck, Card
 
 class Dealer():
     def __init__(self) -> None:
         self.deck = Deck()
+        self.cards = []
 
     def deal(self) -> Card:
         return self.deck.pick()
@@ -13,8 +15,12 @@ class Dealer():
     def settle_bets(self):
         pass
 
-    def hit():
-        pass 
+    def hit(self):
+        self.cards.append(self.deal())
 
-    def draw():
-        pass
+    def draw_until_seventeen(self):
+        while self.calculate_score() < 17:
+            self.hit()
+
+    def calculate_score(self) -> int:
+        return calculate_score(self.cards)

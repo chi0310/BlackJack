@@ -2,9 +2,11 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Optional
 
+# from .event import PlayerEvent
 from . import const
+from .utils import calculate_score
 from .errors import PlayerError
-from blackjack.domain.dealer import Dealer
+from .dealer import Dealer
 
 
 class State(ABC):
@@ -106,22 +108,7 @@ class Player():
         self._cards = []
 
     def calculate_score(self) -> int:
-        value = 0
-        num_of_a = 0
-        for c in self._cards:
-            cnum = c.num
-            if cnum in [11, 12, 13]:
-                value += 10
-            elif cnum == 1:
-                num_of_a += 1
-            else:
-                value += cnum
-        for _ in range(num_of_a):
-            if value + 11 > 21:
-                value += 1
-            else:
-                value += 11
-        return value
+        return calculate_score(self._cards)
 
     def hit(self):
         self._state.hit(self)
@@ -131,6 +118,13 @@ class Player():
 
     def double(self):
         self._state.double(self)
+
+    # def to_player_event(self):
+    #     return PlayerEvent(
+    #         id=self.game_id,
+    #         status=self.state,
+    #         card=[(c.suit, c.num) for c in self._cards]
+    #     )
 
     @property
     def state(self):
