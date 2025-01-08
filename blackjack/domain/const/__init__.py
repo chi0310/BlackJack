@@ -2,22 +2,22 @@ from enum import Enum
 
 
 class PLAYER(Enum):
-    INIT = 0
-    PLAYING = 1
-    FINISHED = 2
-    BUSTED = 3
+    INIT = 'player init'
+    PLAYING = 'player playing'
+    BUSTED = 'player busted'
+    FINISHED = 'player finished'
 
 
 class GAME(Enum):
-    CREATE = 0
-    START = 1
-    JOIN = 2
-    PLAYING = 3
-    END = 4
+    CREATE = 'game create'
+    START = 'game start'
+    JOIN = 'game join'
+    PLAYING = 'game playing'
+    END = 'game end'
 
 
 class SUITS(Enum):
-    SPADES = 0
-    HEARTS = 1
-    DIAMONDS = 2
-    CLUBS = 3
+    SPADES = 'spades'
+    HEARTS = 'hearts'
+    DIAMONDS = 'diamonds'
+    CLUBS = 'clubs'
