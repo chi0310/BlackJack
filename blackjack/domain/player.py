@@ -2,7 +2,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Optional
 
-# from .event import PlayerEvent
+from .event import PlayerEvent
 from . import const
 from .utils import calculate_score
 from .errors import PlayerError
@@ -119,12 +119,13 @@ class Player():
     def double(self):
         self._state.double(self)
 
-    # def to_player_event(self):
-    #     return PlayerEvent(
-    #         id=self.game_id,
-    #         status=self.state,
-    #         card=[(c.suit, c.num) for c in self._cards]
-    #     )
+    def to_player_event(self, is_calc_score: bool = False) -> PlayerEvent:
+        return PlayerEvent(
+            id=self.game_id,
+            status=self.state.value,
+            cards=[(c.suit, c.num) for c in self._cards],
+            final_score=self.calculate_score() if is_calc_score else 0
+        )
 
     @property
     def state(self):

@@ -1,3 +1,6 @@
+import queue
+
+from blackjack.domain.errors import GameError
 from blackjack.domain.event import DomainEvent
 from blackjack.domain.game import Game
 from blackjack.repository.game_repository import GameRepository
@@ -5,8 +8,7 @@ from blackjack.repository.game_repository import GameRepository
 from . import Presenter
 
 game_repo = GameRepository.make('mem')
-repo_err = 'game id is unavaliable'
-
+repo_err = GameError.INVALID_GAME_ID
 
 class CreateGame():
 
@@ -50,12 +52,12 @@ class StartGame():
             self.game_id = game_id
             self.player_id = player_id
 
-    def execute(self, req: Input, presenter: Presenter) -> Presenter:
+    async def execute(self, req: Input, presenter: Presenter) -> Presenter:
         game = game_repo.get(req.game_id)
         if game is None:
             events = [DomainEvent(err=repo_err)]
         else:
-            events = game.start(req.player_id)
+            events = await game.start(req.player_id)
         presenter.present(events)
         return presenter
 
@@ -86,12 +88,12 @@ class PlayStand():
             self.game_id = game_id
             self.player_id = player_id
 
-    def execute(self, req: Input, presenter: Presenter) -> Presenter:
+    async def execute(self, req: Input, presenter: Presenter) -> Presenter:
         game = game_repo.get(req.game_id)
         if game is None:
             events = [DomainEvent(err=repo_err)]
         else:
-            events = game.play_stand(req.player_id)
+            events = await game.play_stand(req.player_id)
         presenter.present(events)
         return presenter
 
@@ -122,12 +124,9 @@ class GameStatus():
             self.game_id = game_id
             self.player_id = player_id
 
-    def execute(self, req: Input, presenter: Presenter) -> Presenter:
+    def execute(self, req: Input) -> queue.Queue:
 
         game = game_repo.get(req.game_id)
-        if game is None:
-            events = [DomainEvent(err=repo_err)]
-        else:
-            events = game.status(req.player_id)
-        presenter.present(events)
-        return presenter
+        q = game.get_event_log(req.player_id)
+        return q
+

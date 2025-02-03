@@ -44,9 +44,3 @@ class TestGameUsecase(unittest.TestCase):
         req = PlayDouble.Input(game_id="game1", player_id="player1")
         presenter = usecase.execute(req, self.presenter)
         self.assertIsNotNone(presenter)
-
-    def test_game_status(self):
-        usecase = GameStatus()
-        req = GameStatus.Input(game_id="game1", player_id="player1")
-        presenter = usecase.execute(req, self.presenter)
-        self.assertIsNotNone(presenter)

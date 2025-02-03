@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+from blackjack.domain import event
 from blackjack.usecase import Presenter
 
 __all__ = [
@@ -44,10 +45,18 @@ class PlayGamePresenter(Presenter):
         return
 
 
+# class GameStatusPresenter(Presenter):
+
+#     class Response(BaseModel):
+#         status: str
+
+#     def as_view_model(self):
+#         return self.Response(status=self.events[0].status)
+
+
 class GameStatusPresenter(Presenter):
 
-    class Response(BaseModel):
-        status: str
+    Response = event.GameEvent
 
     def as_view_model(self):
-        return self.Response(status=self.events[0].status)
+        return self.events[0]

@@ -1,4 +1,6 @@
-from typing import Mapping, Optional, Tuple
+from __future__ import annotations
+from typing import Mapping, Optional, Tuple, List
+import asyncio
 
 from . import const, event
 from .player import Player
@@ -10,41 +12,43 @@ class Game():
 
     def __init__(self) -> None:
         self.game_id = None
-        self._players: Mapping[str, 'Player'] = {}
+        self._players: Mapping[str, Player] = {}
         self._dealer = Dealer()
         self._deck = None
 
+        self._event_log_q: Mapping[str, asyncio.Queue] = {}
         self._status = const.GAME.CREATE
 
     @classmethod
-    def create(cls) -> 'Game':
+    def create(cls) -> Game:
         return cls()
 
     def join(self, player_id: str):
         if len(self._players) >= 4:
             err = GameError.GAME_FULL
-            res = event.ActionEvent(action=const.GAME.JOIN,
+            res = event.ActionEvent(action=const.GAME.JOIN.value,
                                     player_id=player_id,
                                     game_id=self.game_id,
                                     err=err)
             return [res]
         player = Player(player_id, self._dealer, 0)
         self._players[player_id] = player
+        self._event_log_q[player_id] = asyncio.Queue()
         if len(self._players) == 1:
             self.head_id = player_id
-            res = event.ActionEvent(action=const.GAME.CREATE,
+            res = event.ActionEvent(action=const.GAME.CREATE.value,
                                     player_id=player_id,
                                     game_id=self.game_id)
         else:
-            res = event.ActionEvent(action=const.GAME.JOIN,
+            res = event.ActionEvent(action=const.GAME.JOIN.value,
                                     player_id=player_id,
                                     game_id=self.game_id)
         return [res]
 
-    def start(self, player_id):
+    async def start(self, player_id):
         if self.head_id != player_id:
             err = GameError.NOT_HEAD_OF_GAME
-            res = event.ActionEvent(action=const.GAME.START,
+            res = event.ActionEvent(action=const.GAME.START.value,
                                     player_id=player_id,
                                     game_id=self.game_id,
                                     err=err)
@@ -54,11 +58,29 @@ class Game():
             err = None
         else:
             err = GameError.NOT_ENOUGH_PLAYERS
-        res = event.ActionEvent(action=const.GAME.START,
+        res = event.ActionEvent(action=const.GAME.START.value,
                                 player_id=player_id,
                                 game_id=self.game_id,
                                 err=err)
+        print('start1')
+        if err is None:
+            self._init_log_q()
+            self._init_deal()
+            await self._update_status()
+            print('start2')
         return [res]
+
+    def _init_deal(self):
+        for _ in range(2):
+            for player in self._players.values():
+                player.hit()
+            
+        self._dealer.hit()
+        self._dealer.hit()
+
+    def _init_log_q(self):
+        for k in self._players.keys():
+            self._event_log_q[k] = asyncio.Queue()
 
     def _validate_player_action(self, player_id: str) -> Tuple[Optional[Player], Optional[int]]:
         if self._status != const.GAME.START:
@@ -68,64 +90,109 @@ class Game():
             return None, GameError.INVALID_PLAYER_ID
         return player, None
 
-    def play_hit(self, player_id):
+    async def play_hit(self, player_id):
         player, err = self._validate_player_action(player_id)
         if err is not None:
-            res = event.ActionEvent(action=const.GAME.PLAYING,
+            res = event.ActionEvent(action=const.GAME.PLAYING.value,
                                     player_id=player_id,
                                     game_id=self.game_id,
                                     err=err)
             return [res]
         err = player.hit()
-        self.update_status()
-        res = event.ActionEvent(action=const.GAME.PLAYING,
+        await self._update_status()
+        res = event.ActionEvent(action=const.GAME.PLAYING.value,
                                 player_id=player_id,
                                 game_id=self.game_id,
                                 err=err)
         return [res]
 
-    def play_stand(self, player_id):
+    async def play_stand(self, player_id):
         player, err = self._validate_player_action(player_id)
         if err is not None:
-            res = event.ActionEvent(action=const.GAME.PLAYING,
+            res = event.ActionEvent(action=const.GAME.PLAYING.value,
                                 player_id=player_id,
                                 game_id=self.game_id,
                                 err=err)
             return [res]
         err = player.stand()
-        self.update_status()
-        res = event.ActionEvent(action=const.GAME.PLAYING,
+        await self._update_status()
+        res = event.ActionEvent(action=const.GAME.PLAYING.value,
                                 player_id=player_id,
                                 game_id=self.game_id,
                                 err=err)
         return [res]
 
-    def play_double(self, player_id):
+    async def play_double(self, player_id):
         player, err = self._validate_player_action(player_id)
         if err is not None:
-            res = event.ActionEvent(action=const.GAME.PLAYING,
+            res = event.ActionEvent(action=const.GAME.PLAYING.value,
                                 player_id=player_id,
                                 game_id=self.game_id,
                                 err=err)
             return [res]
         err = player.double()
-        self.update_status()
-        res = event.ActionEvent(action=const.GAME.PLAYING,
+        await self._update_status()
+        res = event.ActionEvent(action=const.GAME.PLAYING.value,
                                 player_id=player_id,
                                 game_id=self.game_id,
                                 err=err)
         return [res]
 
-    def update_status(self):
+    async def _update_status(self):
+        """
+        Updates the status of the game and logs the game events for each player.
+        This method checks if all players have finished their turns. If all players
+        have finished, it updates the game status to `const.GAME.END`. It then creates
+        a `GameEvent` for each player, including masked events for other players, and
+        puts the event in the player's event log queue.
+        Returns:
+            bool: True if all players have finished their turns, False otherwise.
+        Note:
+            self._status will only be const.GAME.END or const.GAME.START.
+        """
+        print('update status')
         ret = True
-        for p in self._players.values():
-            if p.state != const.PLAYER.FINISHED:
+        for _, v in self._players.items():
+            if v.state != const.PLAYER.FINISHED:
                 ret = False
         if ret:
             self._status = const.GAME.END
+
+        ids = self._players.keys()
+        for k, v in self._players.items():
+            player_events: List[event.PlayerEvent] = []
+            for id in ids:
+                if id == k:
+                    player_events.append(v.to_player_event(True))
+                else:
+                    p = self._players[id]
+                    if ret:
+                        player_events.append(
+                            p.to_player_event(True)
+                        )
+                    else:
+                        player_events.append(
+                        event.mask_player_event(
+                            p.to_player_event(False)
+                        )
+                    )
+
+            game_event = event.GameEvent(
+                status=self._status.value,
+                dealer=self._dealer.to_dealer_event(is_calc_score=ret),
+                players=player_events
+            )
+            print(game_event)
+            await self._event_log_q[k].put(game_event)
         return ret
 
     def status(self, player_id: str) -> event.DomainEvent:
         # TODO
         # make different event according to player_id
-        return [event.StatusEvent(status=self._status.name)]
+        return [event.StatusEvent(status=self._status.value)]
+
+    def settle(self):
+        pass
+
+    def get_event_log(self, player_id: str) -> asyncio.Queue:
+        return self._event_log_q.get(player_id)
