@@ -70,12 +70,12 @@ class PlayHit():
             self.game_id = game_id
             self.player_id = player_id
 
-    def execute(self, req: Input, presenter: Presenter) -> Presenter:
+    async def execute(self, req: Input, presenter: Presenter) -> Presenter:
         game = game_repo.get(req.game_id)
         if game is None:
             events = [DomainEvent(err=repo_err)]
         else:
-            events = game.play_hit(req.player_id)
+            events = await game.play_hit(req.player_id)
         presenter.present(events)
         return presenter
 

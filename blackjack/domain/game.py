@@ -150,7 +150,6 @@ class Game():
         Note:
             self._status will only be const.GAME.END or const.GAME.START.
         """
-        print('update status')
         ret = True
         for _, v in self._players.items():
             if v.state != const.PLAYER.FINISHED:
@@ -158,18 +157,22 @@ class Game():
         if ret:
             self._status = const.GAME.END
 
+        dealer_event = self._dealer.to_dealer_event(is_calc_score=ret)
         ids = self._players.keys()
         for k, v in self._players.items():
             player_events: List[event.PlayerEvent] = []
+            winners = []
             for id in ids:
                 if id == k:
                     player_events.append(v.to_player_event(True))
                 else:
                     p = self._players[id]
                     if ret:
-                        player_events.append(
-                            p.to_player_event(True)
-                        )
+                        pe = p.to_player_event(True)
+                        player_events.append(pe)
+                        if pe.final_score > dealer_event.final_score and \
+                                pe.final_score <= 21:
+                            winners.append(id)
                     else:
                         player_events.append(
                         event.mask_player_event(
@@ -179,16 +182,14 @@ class Game():
 
             game_event = event.GameEvent(
                 status=self._status.value,
-                dealer=self._dealer.to_dealer_event(is_calc_score=ret),
-                players=player_events
+                dealer=dealer_event,
+                players=player_events,
+                winners=winners,
             )
-            print(game_event)
             await self._event_log_q[k].put(game_event)
         return ret
 
-    def status(self, player_id: str) -> event.DomainEvent:
-        # TODO
-        # make different event according to player_id
+    def status(self) -> event.DomainEvent:
         return [event.StatusEvent(status=self._status.value)]
 
     def settle(self):
