@@ -59,3 +59,4 @@ class GameEvent(BaseModel):
     status: str
     dealer: DealerEvent
     players: list[PlayerEvent]
+    winners: list[str] = []
