@@ -47,26 +47,26 @@ class BustedState(State):
         return PlayerError.PLAYER_BUSTED
 
     def hit(self, player):
-        return self._busted
+        return self._busted()
 
     def stand(self, player):
-        return self._busted
+        return self._busted()
 
     def double(self, player):
-        return self._busted
+        return self._busted()
 
 class FinishedState(State):
     def _finished(self):
         return PlayerError.ROUND_FINISHED
 
     def hit(self, player):
-        return self._finished
+        return self._finished()
 
     def stand(self, player):
-        return self._finished
+        return self._finished()
 
     def double(self, player):
-        return self._finished
+        return self._finished()
 
 def stateins2const(state: State) -> const.PLAYER:
     if isinstance(state, PlayingState):
@@ -111,13 +111,13 @@ class Player():
         return calculate_score(self._cards)
 
     def hit(self):
-        self._state.hit(self)
+        return self._state.hit(self)
 
     def stand(self):
-        self._state.stand(self)
+        return self._state.stand(self)
 
     def double(self):
-        self._state.double(self)
+        return self._state.double(self)
 
     def to_player_event(self, is_calc_score: bool = False) -> PlayerEvent:
         return PlayerEvent(

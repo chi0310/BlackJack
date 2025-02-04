@@ -1,4 +1,5 @@
 import json
+from typing import Optional
 from dataclasses import dataclass, asdict
 from pydantic import BaseModel
 from enum import Enum
@@ -19,18 +20,18 @@ def event2dict(event: BaseModel) -> dict:
     return event.dict()
 
 class DomainEvent(BaseModel):
-    err: int = None
+    err: Optional[int] = None
 
 
 class ActionEvent(BaseModel):
-    err: int = None
+    err: Optional[int] = None
     action: str = ''
     player_id: str = ''
     game_id: str = ''
 
 
 class StatusEvent(BaseModel):
-    err: int = None
+    err: Optional[int] = None
     status: str = ''
 
 

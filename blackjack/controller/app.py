@@ -46,6 +46,17 @@ async def start_game(game_id: str, player_id: str):
     return presenter.as_view_model()
 
 
+@v1.post('/game/{game_id}/{player_id}/play/hit',
+            status_code=status.HTTP_204_NO_CONTENT)
+async def play_hit(game_id: str, player_id: str):
+    presenter = await gu.PlayHit().execute(gu.PlayHit.Input(game_id, player_id),
+                                            PlayGamePresenter())
+    ret = presenter.is_validate
+    if ret is not None:
+        raise HTTPException(status_code=404, detail=ret)
+    return presenter.as_view_model()
+
+
 @v1.post('/game/{game_id}/{player_id}/play/stand',
          status_code=status.HTTP_204_NO_CONTENT)
 async def play_stand(game_id: str, player_id: str):
