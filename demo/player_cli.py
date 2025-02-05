@@ -4,7 +4,7 @@ import argparse
 import threading
 import json
 
-BASE_URL = "http://localhost:8080/api/v1"
+BASE_URL = "http://127.0.0.1:8080/api/v1"
 
 class BlackJackCLI:
     def __init__(self, player_id=None, game_id=None):
