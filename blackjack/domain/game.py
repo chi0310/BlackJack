@@ -64,7 +64,6 @@ class Game():
                                 err=err)
         print('start1')
         if err is None:
-            self._init_log_q()
             self._init_deal()
             await self._update_status()
             print('start2')
@@ -78,9 +77,9 @@ class Game():
         self._dealer.hit()
         self._dealer.hit()
 
-    def _init_log_q(self):
-        for k in self._players.keys():
-            self._event_log_q[k] = asyncio.Queue()
+    # def _init_log_q(self):
+    #     for k in self._players.keys():
+    #         self._event_log_q[k] = asyncio.Queue()
 
     def _validate_player_action(self, player_id: str) -> Tuple[Optional[Player], Optional[int]]:
         if self._status != const.GAME.START:
@@ -152,10 +151,12 @@ class Game():
         """
         ret = True
         for _, v in self._players.items():
-            if v.state != const.PLAYER.FINISHED:
+            if v.state != const.PLAYER.FINISHED and \
+                    v.state != const.PLAYER.BUSTED:
                 ret = False
         if ret:
             self._status = const.GAME.END
+            self._dealer.draw_until_seventeen()
 
         dealer_event = self._dealer.to_dealer_event(is_calc_score=ret)
         ids = self._players.keys()
@@ -163,22 +164,25 @@ class Game():
             player_events: List[event.PlayerEvent] = []
             winners = []
             for id in ids:
+                pe = None
                 if id == k:
-                    player_events.append(v.to_player_event(True))
+                    pe = v.to_player_event(True)
+                    player_events.append(pe)
                 else:
                     p = self._players[id]
                     if ret:
                         pe = p.to_player_event(True)
                         player_events.append(pe)
-                        if pe.final_score > dealer_event.final_score and \
-                                pe.final_score <= 21:
-                            winners.append(id)
                     else:
                         player_events.append(
                         event.mask_player_event(
                             p.to_player_event(False)
                         )
                     )
+                if pe is not None and \
+                        pe.final_score > dealer_event.final_score and \
+                        pe.final_score <= 21:
+                    winners.append(id)
 
             game_event = event.GameEvent(
                 status=self._status.value,
