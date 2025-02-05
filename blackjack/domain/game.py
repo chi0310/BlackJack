@@ -179,9 +179,12 @@ class Game():
                             p.to_player_event(False)
                         )
                     )
-                if pe is not None and \
+                # settle
+                # Dealer busts (score > 21), player wins
+                if dealer_event.final_score > 21 or \
+                        (pe is not None and \
                         pe.final_score > dealer_event.final_score and \
-                        pe.final_score <= 21:
+                        pe.final_score <= 21):
                     winners.append(id)
 
             game_event = event.GameEvent(
