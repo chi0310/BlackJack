@@ -1,0 +1,17 @@
+@startuml player state machine
+
+PlayingState : hit() -> draw card
+PlayingState : stand() -> FinishedState
+PlayingState : double() -> hit() + change state
+
+PlayingState --> BustedState : if score > 21
+PlayingState --> FinishedState : stand()
+PlayingState --> FinishedState : double() (if success)
+
+BustedState : Player busted!
+BustedState --> BustedState : hit() / stand() / double() \n (PLAYER_BUSTED)
+
+FinishedState : Round finished!
+FinishedState --> FinishedState : hit() / stand() / double() \n (ROUND_FINISHED)
+
+@enduml
