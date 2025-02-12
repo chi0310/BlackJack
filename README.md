@@ -18,7 +18,9 @@
 ## 系統架構
 本專案採用三層式架構 (Interface, Application, Domain)，將不同的功能與邏輯分開，提升專案的可維護性、可測試性與擴展性。
 
-- **Interface layer**：負責與外部進行交互，處理來自用戶或其他系統的 API 請求與回應。該層使用 FastAPI 來實現各種遊戲相關的 API 端點，且不包含任何業務邏輯。
+- **Interface layer**：負責與外部進行交互，不包含任何業務邏輯。
+  - **API 端點**: 使用 FastAPI 來實現遊戲相關的 API 端點，處理遊戲的創建、玩家加入、遊戲狀態更新等功能。
+  - **Game Repository**: `Interface layer` 中包含 `Game Repository`，用於遊戲資料的存取與管理。該 Repository 採用抽象層設計，支援不同的資料庫後端。目前專案使用 In-Memory 儲存，但未來可輕鬆擴展至 MongoDB、PostgreSQL 等資料庫，提供更大的靈活性與可擴展性。
 
 - **Application layer**：負責執行具體的業務邏輯和應用邏輯，例如處理遊戲創建、加入玩家、進行回合等操作。該層邏輯依賴於 Interface 層提供的輸入，並將處理結果交給 Domain 層。
 
