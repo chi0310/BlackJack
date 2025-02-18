@@ -28,6 +28,8 @@
 
 ![sytstem arch](arch.png)
 
+Player 各狀態(PlayingState、BustedState與FinishedState)使用 state mcahine 實作
+ 
 ![player state machin](player_state_machine.png)
 
 ## 安裝與執行方式
